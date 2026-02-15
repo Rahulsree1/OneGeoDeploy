@@ -2,10 +2,14 @@
 Flask application entry point.
 Run with: python app.py (so SocketIO uses eventlet for WebSocket support).
 Serves the built frontend from backend when frontend/dist exists.
+On Vercel (serverless), eventlet is skipped to avoid "RLock not greened" errors.
 """
 import os
-import eventlet
-eventlet.monkey_patch()
+
+# Only use eventlet when not on Vercel; serverless loads modules before our code, so monkey_patch() runs too late
+if not os.environ.get("VERCEL"):
+    import eventlet
+    eventlet.monkey_patch()
 
 from flask import Flask, send_from_directory
 from flask_cors import CORS
